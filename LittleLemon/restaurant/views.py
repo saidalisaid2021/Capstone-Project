@@ -3,7 +3,7 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, De
 from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.viewsets import ModelViewSet
 from .models import MenuItem,Menu,Booking
 from django.contrib.auth.models import User
@@ -27,13 +27,12 @@ class MenuView(APIView):
         return Response(serializer.data)
     
 class BookingViewSet(ModelViewSet):
-    def get(self,request):
-        items = Booking.objects.all()
-        serializer = BookingSerializer(items, many=True)
-        return Response(serializer.data)
-    
-    
+    queryset = Booking.objects.all()
+    serializer_class =BookingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+        
 class MenuItemsView(ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
 
@@ -45,3 +44,10 @@ class UserViewSet(ModelViewSet):
    queryset = User.objects.all()
    serializer_class = UserSerializer
    permission_classes = [permissions.IsAuthenticated]
+   
+   
+@api_view()
+@permission_classes([permissions.IsAuthenticated])
+# @authentication_classes([TokenAuthentication])
+def msg(request):
+    return Response({"message":"This view is protected"})
